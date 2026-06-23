@@ -679,7 +679,7 @@
         <p style="font-size: 0.9rem; letter-spacing: 2px; color: rgba(184, 44, 42, 0.6);">16 . 07 . 2026 | 08:00 PM</p>
     </main>
 
-    <script>
+   <script>
     // --- 1. Setup Ambient Floating Hearts ---
     function generateBackgroundHearts() {
         const container = document.getElementById('hearts-container');
@@ -821,7 +821,7 @@
     const cloudDisplayBox = document.getElementById('messagesDisplayBox');
     const cloudMessagesList = document.getElementById('messagesList');
 
-    // Handle Form Submit (Save Message + Trigger Fireworks)
+    // Handle Form Submit
     if (cloudForm) {
         cloudForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -833,57 +833,67 @@
                 return;
             }
 
-            firebaseDb.ref('wedding_messages').push({
-                name: nameVal,
-                text: textVal,
-                timestamp: Date.now()
-            }).then(() => {
-                cloudForm.reset();
-                triggerFireworksSequence();
-                alert("Thank you for your warm wishes! ❤️");
-            }).catch((err) => {
-                console.error("Data save error:", err);
-            });
+            if (nameVal && textVal) {
+                firebaseDb.ref('wedding_messages').push({
+                    name: nameVal,
+                    text: textVal,
+                    timestamp: Date.now()
+                }).then(() => {
+                    cloudForm.reset();
+                    triggerFireworksSequence();
+                    alert("Thank you for your warm wishes! ❤️");
+                }).catch((err) => {
+                    console.error("Data save error:", err);
+                });
+            }
         });
     }
 
-    // Fetch and sync messages from Firebase
-   function syncFirebaseMessages() {
-    if (!firebaseDb || !cloudMessagesList) return;
-    
-    // السطر ده هو السحر! بيلغي أي Listener قديم عشان ميتكررش الكلام
-    firebaseDb.ref('wedding_messages').off();
-    
-    firebaseDb.ref('wedding_messages').orderByChild('timestamp').on('value', (snapshot) => {
-        cloudMessagesList.innerHTML = '';
-        
-        if (!snapshot.exists()) {
-            cloudMessagesList.innerHTML = `<p style="font-size: 0.9rem; font-style: italic; color: gray; text-align: center;">No messages yet...</p>`;
-            return;
-        }
-        
-        snapshot.forEach((childSnapshot) => {
-            const data = childSnapshot.val();
-            const divItem = document.createElement('div');
-            divItem.style.cssText = "border-bottom: 1px dashed rgba(184, 44, 42, 0.1); padding: 8px 0; margin-bottom: 5px;";
-            divItem.innerHTML = `
-                <strong style="color: var(--primary-red); font-size: 0.95rem;">${data.name}:</strong>
-                <p style="margin: 3px 0 0 0; font-size: 0.9rem; color: #333;">${data.text}</p>
-            `;
-            cloudMessagesList.insertBefore(divItem, cloudMessagesList.firstChild);
-        });
-    });
-}
-    // Toggle View/Hide Messages Panel
+    // Toggle View/Hide Messages Panel with Password
+    let isMessagesOpen = false;
+
     if (cloudViewBtn && cloudDisplayBox) {
         cloudViewBtn.addEventListener('click', function() {
-            if (cloudDisplayBox.style.display === 'none' || cloudDisplayBox.style.display === '') {
-                syncFirebaseMessages(); 
-                cloudDisplayBox.style.display = 'block'; 
-                cloudViewBtn.innerHTML = '🙈 Hide Messages';
+            if (!isMessagesOpen) {
+                const enteredPassword = prompt("Please enter the secret password to view messages:");
+                const correctPassword = "nada2026";
+
+                if (enteredPassword === correctPassword) {
+                    isMessagesOpen = true;
+                    cloudDisplayBox.style.display = "block";
+                    cloudViewBtn.innerHTML = "🙈 Hide Messages";
+                    
+                    if (firebaseDb) {
+                        cloudMessagesList.innerHTML = '<p style="text-align: center; font-style: italic;">Loading sweet words...</p>';
+                        
+                        firebaseDb.ref('wedding_messages').orderByChild('timestamp').on('value', (snapshot) => {
+                            cloudMessagesList.innerHTML = ''; 
+                            if (snapshot.exists()) {
+                                snapshot.forEach((childSnapshot) => {
+                                    const data = childSnapshot.val();
+                                    const msgText = data.text || data.message; 
+                                    
+                                    const divItem = document.createElement('div');
+                                    divItem.style.cssText = "background: rgba(184, 44, 42, 0.05); padding: 12px; margin-bottom: 12px; border-radius: 8px; border-left: 3px solid var(--primary-red);";
+                                    divItem.innerHTML = `
+                                        <strong style="color: var(--primary-red); font-family: var(--font-serif);">${data.name}</strong>
+                                        <p style="margin-top: 5px; font-size: 0.95rem; color: var(--text-dark);">${msgText}</p>
+                                    `;
+                                    cloudMessagesList.insertBefore(divItem, cloudMessagesList.firstChild);
+                                });
+                            } else {
+                                cloudMessagesList.innerHTML = '<p style="text-align: center; color: gray;">No messages yet...</p>';
+                            }
+                        });
+                    }
+                } else if (enteredPassword !== null) {
+                    alert("Wrong password! ❌ Only Mahmoud & Nada can see this.");
+                }
             } else {
-                cloudDisplayBox.style.display = 'none';
-                cloudViewBtn.innerHTML = '👁️ View Received Messages';
+                isMessagesOpen = false;
+                cloudDisplayBox.style.display = "none";
+                cloudViewBtn.innerHTML = "👁️ View Received Messages";
+                if (firebaseDb) firebaseDb.ref('wedding_messages').off(); 
             }
         });
     }
@@ -920,6 +930,9 @@
 
     // Run background elements
     generateBackgroundHearts();
+</script>
+</body>
+</html>
 </script>
 </body>
 </html>
