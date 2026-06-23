@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahmoud  & Nada  Wedding</title>
+    
+    <!-- Fonts matching the style exactly -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <!-- Firebase App (Core) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<!-- Firebase Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --bg-color: #fdf2e9; 
+            --primary-red: #b82c2a; 
+            --card-bg: #fffbf7;
+            --text-dark: #7a1d1b;
+            --font-handwritten: 'Caveat', cursive;
+            --font-serif: 'Playfair Display', serif;
+            
+            /* Dress Code Colors extracted from image_ebc5b1.jpg */
+            --color-1: #606653; /* Dark Olive */
+            --color-2: #8e9282; /* Sage Green */
+            --color-3: #b58d86; /* Dusty Rose */
+            --color-4: #f3b9b4; /* Blush Pink */
+            --color-5: #fcdbd9; /* Light Petal Pink */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-family: var(--font-serif);
+            overflow-x: hidden;
+            text-align: center;
+        }
+
+        /* --- Floating Hearts Background Layer --- */
+        .hearts-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            color: rgba(184, 44, 42, 0.25); 
+            font-size: 1.5rem;
+            animation: floatUp 10s infinite linear;
+            bottom: -50px;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg) scale(0.8);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-110vh) translateX(50px) rotate(360deg) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* --- Global Custom Dashed Card Style --- */
+        .dashed-card {
+            background-color: var(--card-bg);
+            border: 2px dashed rgba(184, 44, 42, 0.4);
+            border-radius: 20px;
+            padding: 30px 20px;
+            max-width: 350px;
+            margin: 0 auto 40px auto;
+            box-shadow: 0 8px 20px rgba(184, 44, 42, 0.05);
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title {
+            font-family: var(--font-handwritten);
+            font-size: 3.5rem;
+            color: var(--primary-red);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .dots-divider {
+            color: rgba(184, 44, 42, 0.3);
+            letter-spacing: 3px;
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+        }
+
+        /* --- 1. Envelope Scene --- */
+        #opening-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        .envelope-wrapper {
+            width: 320px;
+            height: 220px;
+            background-color: #f77f7d;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 120px solid var(--primary-red);
+            transform-origin: top;
+            transition: transform 0.6s ease;
+            z-index: 4;
+        }
+
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-left: 160px solid #e15451;
+            border-right: 160px solid #e15451;
+            border-bottom: 120px solid #cb3b39;
+            border-radius: 0 0 4px 4px;
+            z-index: 3;
+        }
+
+        .envelope-seal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 45px;
+            height: 45px;
+            background-color: #fffbf7;
+            border-radius: 50%;
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary-red);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: opacity 0.3s ease;
+        }
+
+        .envelope-wrapper.open .envelope-seal {
+            opacity: 0;
+        }
+
+        .letter-card {
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            width: 290px;
+            height: 190px;
+            background: white;
+            border-radius: 4px;
+            padding: 20px;
+            z-index: 2;
+            transition: transform 0.8s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .envelope-wrapper.open .letter-card {
+            transform: translateY(-130px);
+            z-index: 5;
+        }
+
+        /* --- Main Flow --- */
+        main {
+            padding: 40px 15px;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .intro-text {
+            font-family: var(--font-handwritten);
+            font-size: 1.8rem;
+            color: var(--primary-red);
+            margin-bottom: 10px;
+        }
+
+        .couple-names {
+            font-family: var(--font-handwritten);
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--primary-red);
+            margin-bottom: 20px;
+        }
+
+        /* Polaroid Frame */
+        .polaroid-frame {
+            background: white;
+            padding: 15px 15px 35px 15px;
+            box-shadow: 0 10px 25px rgba(184, 44, 42, 0.1);
+            border-radius: 2px;
+            margin-bottom: 40px;
+            transform: rotate(-2deg);
+        }
+
+        .polaroid-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .polaroid-caption {
+            font-family: var(--font-handwritten);
+            font-size: 1.8rem;
+            margin-top: 15px;
+            color: var(--primary-red);
+        }
+
+        /* --- Favorites Grid --- */
+        .fav-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .fav-item {
+            background: white;
+            padding: 8px 8px 15px 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border-radius: 4px;
+        }
+
+        .fav-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+
+        /* --- Dress Code Color Palette Elements (`image_ebc5b1.jpg`) --- */
+        .palette-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .color-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- Save The Date Calendar --- */
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px 2px;
+            font-size: 0.9rem;
+        }
+
+        .cal-header {
+            font-family: var(--font-handwritten);
+            font-size: 2.5rem;
+            color: var(--primary-red);
+            margin-bottom: 15px;
+        }
+
+        .cal-day-name {
+            font-weight: bold;
+            color: rgba(184, 44, 42, 0.6);
+            font-size: 0.8rem;
+        }
+
+        .cal-day {
+            padding: 5px 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cal-day.event-date {
+            color: white;
+            font-weight: bold;
+        }
+
+        .cal-day.event-date::before {
+            content: '\f004';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            color: var(--primary-red);
+            font-size: 1.8rem;
+            z-index: -1;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- Buttons & Inputs --- */
+        .btn-main {
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-family: var(--font-handwritten);
+            font-size: 1.6rem;
+            border-radius: 25px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(184, 44, 42, 0.2);
+        }
+
+        .form-control {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(184, 44, 42, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            color: var(--text-dark);
+            font-family: var(--font-serif);
+        }
+
+        .form-control::placeholder {
+            color: rgba(184, 44, 42, 0.4);
+            font-family: var(--font-handwritten);
+            font-size: 1.3rem;
+        }
+
+        /* --- Fireworks Element --- */
+        #canvas-fireworks {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10000;
+            display: none;
+        }
+        /* --- Updated Global Dashed Card (Removed White Background) --- */
+.dashed-card {
+    /* lghina el-background-color el-byda tmamam y2ba shfaf */
+    background-color: transparent; 
+    border: 2px dashed rgba(184, 44, 42, 0.4);
+    border-radius: 20px;
+    padding: 30px 20px;
+    max-width: 350px;
+    margin: 0 auto 40px auto;
+    /* lghina el-box-shadow kman 3shan mfeesh backgroud t3ml shadow */
+    box-shadow: none; 
+    position: relative;
+    z-index: 2;
+}
+
+/* --- Updated Polaroid & Favorites Grid Items --- */
+.polaroid-frame {
+    /* kman law el-polaroid background lazm ykon transparent aw beige matching */
+    background: transparent; 
+    padding: 15px 15px 35px 15px;
+    box-shadow: none;
+    border: 2px dashed rgba(184, 44, 42, 0.3); /* t2dry tkhleh dashed zihom */
+    border-radius: 2px;
+    margin-bottom: 40px;
+    transform: rotate(-2deg);
+}
+
+.fav-item {
+    background: transparent; /* lghina el-byad mn wra el-swar */
+    padding: 8px;
+    box-shadow: none;
+    border-radius: 4px;
+}
+
+/* --- Inputs & Textarea Styling (Clean & Transparent) --- */
+.form-control {
+    width: 100%;
+    background: transparent; /* ykoun transparent gwa el-form */
+    border: 1px solid rgba(184, 44, 42, 0.3);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 15px;
+    color: var(--text-dark);
+    font-family: var(--font-serif);
+}
+    </style>
+</head>
+<body>
+
+    <!-- Floating Background Layer -->
+    <div class="hearts-background" id="hearts-container"></div>
+    <canvas id="canvas-fireworks"></canvas>
+
+    <!-- 1. Envelope Opening Component -->
+    <div id="opening-scene">
+        <div class="envelope-wrapper" id="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-seal"><i class="fa-solid fa-heart"></i></div>
+            <div class="letter-card">
+                <p class="intro-text" style="font-size: 1.2rem;">You're invited to celebrate</p>
+                <h2 style="font-family: var(--font-handwritten); color: var(--primary-red); font-size: 2rem;">Mahmoud &amp; Nada </h2>
+                <div style="color: var(--primary-red); margin-top: 10px;">
+                    <i class="fa-solid fa-heart" style="font-size: 0.6rem;"></i>
+                    <i class="fa-solid fa-heart" style="font-size: 0.9rem; margin: 0 4px;"></i>
+                    <i class="fa-solid fa-heart" style="font-size: 0.6rem;"></i>
+                </div>
+            </div>
+            <div class="envelope-pocket"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <p class="intro-text" style="margin-top: 40px;">* YOU'RE INVITED *</p>
+        <h1 class="couple-names">Mahmoud<br><span style="font-size: 2rem; font-weight: normal;">&amp;</span><br>Nada</h1>
+        
+        <div class="polaroid-frame">
+            <img src="./WhatsApp Image 2026-06-05 at 12.07.12 AM.jpeg" alt="Mahmoud  and Nada  Frame">
+            <p class="polaroid-caption">the troublemakers <span style="color: var(--primary-red);">❤️</span></p>
+        </div>
+
+        <p class="intro-text" style="font-size: 2rem; margin-bottom: 5px;">July 16, 2026</p>
+
+        <!-- Guess What Card -->
+        <div class="dashed-card">
+            <h2 class="section-title">Guess what?</h2>
+            <div class="dots-divider">•••••••••••••</div>
+            <p style="line-height: 1.6; font-size: 1.1rem;">
+                Time flew by so fast – and these two cuties are about to get married! Yep, we still can't believe it ourselves. From scraped knees and silly games to vows and forever... here we go! 💍✨
+            </p>
+        </div>
+
+        <!-- A Few Favorites -->
+        <h2 class="section-title" style="font-size: 3rem;">A few favorites</h2>
+        <div class="dots-divider">•••••••••••••</div>
+        
+        <div class="fav-grid">
+            <div class="fav-item"><img src="./image 1.jpeg" alt="Fav 1"></div>
+            <div class="fav-item"><img src="./image 2.jpeg" alt="Fav 2"></div>
+            <div class="fav-item"><img src="./image 3.jpeg" alt="Fav 3"></div>
+            <div class="fav-item"><img src="./image 4.jpeg" alt="Fav 4"></div>
+        </div>
+
+        <!-- NEW: Dress Code Section matching image_ebc5b1.jpg -->
+       
+
+        <div class="dashed-card">
+    <h2 class="section-title" style="font-size: 3rem;">Dress Code</h2>
+    <div class="dots-divider">•••••••••••••</div>
+    <p style="font-size: 1.1rem; line-height: 1.5; margin-bottom: 25px;">
+        We would love to see you in our favorite tones! Please choose your outfit according to our wedding style:
+    </p>
+    
+    <div style="display: flex; flex-direction: column; gap: 25px; align-items: center; justify-content: center;">
+        
+        <div>
+            <p style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: var(--primary-red);">
+                For Ladies:
+            </p>
+            <div class="palette-container" style="display: flex; justify-content: center; align-items: center; gap: 12px;">
+                <div class="color-circle" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: var(--color-1);" title="Olive"></div>
+                <div class="color-circle" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: var(--color-2);" title="Sage"></div>
+                <div class="color-circle" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: var(--color-3);" title="Dusty Rose"></div>
+                <div class="color-circle" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: var(--color-4);" title="Blush Pink"></div>
+                <div class="color-circle" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: var(--color-5);" title="Light Pink"></div>
+            </div>
+        </div>
+
+        <div>
+            <p style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: bold; margin-bottom: 10px; color: var(--primary-red);">
+                For Gentlemen:
+            </p>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                <div class="color-circle" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); background-color: #000000;" title="Black Suit"></div>
+                <span style="font-size: 1rem; font-family: var(--font-serif); color: var(--text-dark);">Black Suit</span>
+            </div>
+        </div>
+
+    </div>
+
+    <p style="margin-top: 25px; font-family: var(--font-handwritten); font-size: 1.6rem; color: var(--primary-red); font-weight: bold;">
+        * Formal & Elegant attire is preferred *
+    </p>
+</div>
+
+
+
+
+
+
+
+        <div class="dashed-card">
+            <p style="font-family: var(--font-handwritten); font-size: 2.2rem; line-height: 1.3; color: var(--primary-red); font-weight: bold;">
+                We would love for you to be part of our special day!
+            </p>
+            <p style="margin-top: 15px; font-size: 0.95rem; color: #a0605e;">
+                Pull up your comfiest shoes — we're throwing the party of our lives 💃🕺
+            </p>
+        </div>
+
+        <!-- Save the date Calendar -->
+       <!-- Save the date Calendar -->
+<div class="dashed-card">
+    <h2 class="section-title">Save the date</h2>
+    <div class="dots-divider">•••••••••••••</div>
+    <div class="cal-header">July 2026</div>
+    
+    <div class="cal-grid">
+        <!-- Day Names -->
+        <div class="cal-day-name">S</div><div class="cal-day-name">M</div><div class="cal-day-name">T</div>
+        <div class="cal-day-name">W</div><div class="cal-day-name">T</div><div class="cal-day-name">F</div>
+        <div class="cal-day-name">S</div>
+        
+        <!-- Empty slots to align Wednesday as July 1st -->
+        <div class="cal-day"></div><div class="cal-day"></div><div class="cal-day"></div>
+        
+        <!-- Days 1 to 4 -->
+        <div class="cal-day">1</div><div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day">4</div>
+        
+        <!-- Days 5 to 15 (yom 5 normal solid text dlw2ty) -->
+        <div class="cal-day">5</div><div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div>
+        <div class="cal-day">9</div><div class="cal-day">10</div><div class="cal-day">11</div><div class="cal-day">12</div>
+        <div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div>
+        
+        <!-- Yom 16 hwa ely fyeh el-heart active class -->
+        <div class="cal-day event-date">16</div>
+        
+        <!-- Remaining Days -->
+        <div class="cal-day">17</div><div class="cal-day">18</div><div class="cal-day">19</div><div class="cal-day">20</div>
+        <div class="cal-day">21</div><div class="cal-day">22</div><div class="cal-day">23</div><div class="cal-day">24</div>
+        <div class="cal-day">25</div><div class="cal-day">26</div><div class="cal-day">27</div><div class="cal-day">28</div>
+        <div class="cal-day">29</div><div class="cal-day">30</div><div class="cal-day">31</div>
+    </div>
+</div>
+
+        <!-- Where Venue Section -->
+        <div class="dashed-card">
+            <h2 class="section-title">Where?</h2>
+            <div class="dots-divider">•••••••••••••</div>
+            <img src="./WhatsApp Image 2026-06-05 at 1.02.59 AM.jpeg" alt="Venue Location" style="width:100%; border-radius:10px; margin-bottom:15px;">
+            <h3 style="font-family: var(--font-handwritten); font-size: 2rem; color: var(--primary-red);">Tiba Rose Plaza hall</h3>
+            <h3 style="font-family: var(--font-handwritten); font-size: 2rem; color: var(--primary-red);">Lavandula hotel</h3>
+            <p style="font-size: 0.9rem; color: #a0605e; margin-top: 5px;">Cairo, Egypt</p>
+            <a href="https://www.google.com/maps/place/30%C2%B001'09.1%22N+31%C2%B022'32.9%22E/@30.0192032,31.3732395,17z/data=!3m1!4b1!4m4!3m3!8m2!3d30.0192032!4d31.3758144?hl=en&entry=ttu&g_ep=EgoyMDI2MDYwMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" class="btn-main">Open Location ❤️</a>
+        </div>
+
+
+
+        <div class="dashed-card" style="text-align: center;">
+    <h2 class="section-title" style="font-size: 3rem;">When?</h2>
+    <div class="dots-divider">•••••••••••••</div>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 20px;">
+        
+        <div style="font-family: var(--font-serif); font-size: 1.8rem; font-weight: bold; color: var(--primary-red); letter-spacing: 1px;">
+            Thursday, July 16, 2026
+        </div>
+        
+        <div style="border: 2px dashed rgba(184, 44, 42, 0.5); border-radius: 50px; padding: 10px 30px; display: inline-flex; align-items: center; gap: 15px;">
+            <span style="font-size: 1.3rem; font-weight: bold; color: var(--primary-red); font-family: var(--font-serif);">
+                8:00 PM
+            </span>
+            <span style="width: 1px; height: 20px; background-color: rgba(184, 44, 42, 0.3);"></span>
+            <span style="font-family: var(--font-handwritten); font-size: 1.5rem; color: var(--text-dark);">
+                Guests arrival 🥂
+            </span>
+        </div>
+
+    </div>
+</div>
+
+        <div class="dashed-card">
+    <h2 class="section-title" style="font-size: 3rem; line-height: 1.1;">Time left until we meet!</h2>
+    <div class="dots-divider">•••••••••••••</div>
+    
+    <div style="display: flex; justify-content: center; gap: 8px; margin-top: 15px;">
+        <div style="border: 2px dashed rgba(184, 44, 42, 0.4); border-radius: 15px; padding: 10px; min-width: 65px;">
+            <div id="days" style="font-size: 1.8rem; font-weight: bold; color: var(--primary-red);">00</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(184, 44, 42, 0.6); margin-top: 2px;">Days</div>
+        </div>
+        <div style="border: 2px dashed rgba(184, 44, 42, 0.4); border-radius: 15px; padding: 10px; min-width: 65px;">
+            <div id="hours" style="font-size: 1.8rem; font-weight: bold; color: var(--primary-red);">00</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(184, 44, 42, 0.6); margin-top: 2px;">Hours</div>
+        </div>
+        <div style="border: 2px dashed rgba(184, 44, 42, 0.4); border-radius: 15px; padding: 10px; min-width: 65px;">
+            <div id="minutes" style="font-size: 1.8rem; font-weight: bold; color: var(--primary-red);">00</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(184, 44, 42, 0.6); margin-top: 2px;">Minutes</div>
+        </div>
+        <div style="border: 2px dashed rgba(184, 44, 42, 0.4); border-radius: 15px; padding: 10px; min-width: 65px;">
+            <div id="seconds" style="font-size: 1.8rem; font-weight: bold; color: var(--primary-red);">00</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(184, 44, 42, 0.6); margin-top: 2px;">Seconds</div>
+        </div>
+    </div>
+</div>
+
+
+
+
+  
+
+
+
+<!-- Leave us a message Section (Nada & Mahmoud Wedding) -->
+<div class="dashed-card">
+    <h2 class="section-title" style="font-size: 3rem;">Leave us a message</h2>
+    <div class="dots-divider">•••••••••••••</div>
+    
+    <form id="weddingAuthForm">
+        <input type="text" id="guestName" class="form-control" placeholder="Your name" required>
+        <textarea id="guestText" class="form-control" rows="4" placeholder="Write something sweet..." required></textarea>
+        
+        <button type="submit" class="submit-btn" style="width: 100%; background-color: var(--primary-red); color: white; border: none; padding: 12px; border-radius: 25px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">
+            Send with love
+        </button>
+    </form>
+
+    <!-- Admin Button for Nada & Mahmoud -->
+    <button type="button" id="viewMessagesBtn" style="background: transparent; border: 1px dashed rgba(184, 44, 42, 0.5); color: var(--primary-red); padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; margin-top: 5px;">
+    👁️ View Received Messages
+</button>
+
+    <!-- Hidden Messages Box -->
+    <div id="messagesDisplayBox" style="display: none; margin-top: 20px; padding: 15px; border-top: 1px dashed rgba(184, 44, 42, 0.3); text-align: left; max-height: 250px; overflow-y: auto;">
+        <h4 style="font-family: var(--font-serif); color: var(--primary-red); margin-bottom: 10px; text-align: center;">All Sweet Words ❤️</h4>
+        <div id="messagesList">
+            <p style="font-size: 0.9rem; font-style: italic; color: gray; text-align: center;">No messages yet...</p>
+        </div>
+    </div>
+</div>
+
+        <p class="intro-text" style="font-size: 2.2rem; margin: 40px 0 10px 0; font-weight: bold;">We can't wait to celebrate with you!</p>
+        <p class="intro-text" style="font-size: 2.5rem; font-weight: bold; margin-bottom: 5px;">Mahmoud  &amp; Nada </p>
+        <p style="font-size: 0.9rem; letter-spacing: 2px; color: rgba(184, 44, 42, 0.6);">16 . 07 . 2026 | 08:00 PM</p>
+    </main>
+
+    <script>
+    // --- 1. Setup Ambient Floating Hearts ---
+    function generateBackgroundHearts() {
+        const container = document.getElementById('hearts-container');
+        const maxHearts = 15;
+        if (!container) return;
+
+        for (let i = 0; i < maxHearts; i++) {
+            const heart = document.createElement('i');
+            heart.classList.add('fa-solid', 'fa-heart', 'floating-heart');
+            
+            heart.style.left = `${Math.random() * 100}vw`;
+            heart.style.animationDelay = `${Math.random() * 10}s`;
+            heart.style.animationDuration = `${Math.random() * 6 + 6}s`;
+            heart.style.fontSize = `${Math.random() * 1 + 0.8}rem`;
+            
+            container.appendChild(heart);
+        }
+    }
+
+    // --- 2. Envelope Opening Sequence ---
+    const envelope = document.getElementById('envelope');
+    if (envelope) {
+        envelope.addEventListener('click', function() {
+            this.classList.add('open');
+            setTimeout(() => {
+                const openingScene = document.getElementById('opening-scene');
+                if (openingScene) {
+                    openingScene.style.opacity = '0';
+                    setTimeout(() => {
+                        openingScene.style.display = 'none';
+                    }, 800);
+                }
+            }, 1500);
+        });
+    }
+
+    // --- 3. Fireworks Configuration ---
+    const canvasElement = document.getElementById('canvas-fireworks');
+    const ctx = canvasElement ? canvasElement.getContext('2d') : null;
+    let particles = [];
+    let running = false;
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 2;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.alpha = 1;
+            this.decay = Math.random() * 0.015 + 0.01;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += 0.05; 
+            this.alpha -= this.decay;
+        }
+        draw() {
+            if (!ctx) return;
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    function animateFireworks() {
+        if (!running || !ctx || !canvasElement) return;
+        requestAnimationFrame(animateFireworks);
+        ctx.fillStyle = 'rgba(253, 242, 233, 0.2)'; 
+        ctx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+
+        if (Math.random() < 0.08) {
+            const fireworkX = Math.random() * canvasElement.width;
+            const fireworkY = Math.random() * (canvasElement.height * 0.6);
+            const colors = ['#b82c2a', '#e15451', '#f77f7d', '#ffb3b1'];
+            const pickedColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            for (let i = 0; i < 30; i++) {
+                particles.push(new Particle(fireworkX, fireworkY, pickedColor));
+            }
+        }
+        
+        for (let i = particles.length - 1; i >= 0; i--) {
+            particles[i].update();
+            if (particles[i].alpha <= 0) {
+                particles.splice(i, 1);
+            } else {
+                particles[i].draw();
+            }
+        }
+    }
+
+    function triggerFireworksSequence() {
+        if (!canvasElement) return;
+        canvasElement.width = window.innerWidth;
+        canvasElement.height = window.innerHeight;
+        canvasElement.style.display = 'block';
+        running = true;
+        animateFireworks();
+
+        setTimeout(() => {
+            running = false;
+            canvasElement.style.display = 'none';
+            particles = [];
+        }, 5000);
+    }
+
+    // --- 4. Firebase Configuration & Logic ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyClp4zCSyronqPqGg0pP-y0uIbKhYlb2dw",
+        authDomain: "wedding-invitation-b27df.firebaseapp.com",
+        projectId: "wedding-invitation-b27df",
+        storageBucket: "wedding-invitation-b27df.firebasestorage.app",
+        messagingSenderId: "131610168206",
+        appId: "1:131610168206:web:6c64ba9b1c024fe28b72df",
+        measurementId: "G-YHZWZ9LC2R", 
+        databaseURL: "https://wedding-invitation-b27df-default-rtdb.firebaseio.com"
+    };
+
+    let firebaseDb;
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        firebaseDb = firebase.database();
+    } catch (error) {
+        console.error("Firebase connection error:", error);
+    }
+
+    const cloudForm = document.getElementById('weddingAuthForm');
+    const cloudViewBtn = document.getElementById('viewMessagesBtn');
+    const cloudDisplayBox = document.getElementById('messagesDisplayBox');
+    const cloudMessagesList = document.getElementById('messagesList');
+
+    // Handle Form Submit (Save Message + Trigger Fireworks)
+    if (cloudForm) {
+        cloudForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById('guestName').value;
+            const textVal = document.getElementById('guestText').value;
+            
+            if (!firebaseDb) {
+                alert("Database is currently offline.");
+                return;
+            }
+
+            firebaseDb.ref('wedding_messages').push({
+                name: nameVal,
+                text: textVal,
+                timestamp: Date.now()
+            }).then(() => {
+                cloudForm.reset();
+                triggerFireworksSequence();
+                alert("Thank you for your warm wishes! ❤️");
+            }).catch((err) => {
+                console.error("Data save error:", err);
+            });
+        });
+    }
+
+    // Fetch and sync messages from Firebase
+   function syncFirebaseMessages() {
+    if (!firebaseDb || !cloudMessagesList) return;
+    
+    // السطر ده هو السحر! بيلغي أي Listener قديم عشان ميتكررش الكلام
+    firebaseDb.ref('wedding_messages').off();
+    
+    firebaseDb.ref('wedding_messages').orderByChild('timestamp').on('value', (snapshot) => {
+        cloudMessagesList.innerHTML = '';
+        
+        if (!snapshot.exists()) {
+            cloudMessagesList.innerHTML = `<p style="font-size: 0.9rem; font-style: italic; color: gray; text-align: center;">No messages yet...</p>`;
+            return;
+        }
+        
+        snapshot.forEach((childSnapshot) => {
+            const data = childSnapshot.val();
+            const divItem = document.createElement('div');
+            divItem.style.cssText = "border-bottom: 1px dashed rgba(184, 44, 42, 0.1); padding: 8px 0; margin-bottom: 5px;";
+            divItem.innerHTML = `
+                <strong style="color: var(--primary-red); font-size: 0.95rem;">${data.name}:</strong>
+                <p style="margin: 3px 0 0 0; font-size: 0.9rem; color: #333;">${data.text}</p>
+            `;
+            cloudMessagesList.insertBefore(divItem, cloudMessagesList.firstChild);
+        });
+    });
+}
+    // Toggle View/Hide Messages Panel
+    if (cloudViewBtn && cloudDisplayBox) {
+        cloudViewBtn.addEventListener('click', function() {
+            if (cloudDisplayBox.style.display === 'none' || cloudDisplayBox.style.display === '') {
+                syncFirebaseMessages(); 
+                cloudDisplayBox.style.display = 'block'; 
+                cloudViewBtn.innerHTML = '🙈 Hide Messages';
+            } else {
+                cloudDisplayBox.style.display = 'none';
+                cloudViewBtn.innerHTML = '👁️ View Received Messages';
+            }
+        });
+    }
+
+    // --- 5. Dynamic Countdown Timer ---
+    const targetDate = new Date("July 16, 2026 20:00:00").getTime();
+    const countdownInterval = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        const dEl = document.getElementById("days");
+        const hEl = document.getElementById("hours");
+        const mEl = document.getElementById("minutes");
+        const sEl = document.getElementById("seconds");
+
+        if (dEl) dEl.innerHTML = days < 10 ? "0" + days : days;
+        if (hEl) hEl.innerHTML = hours < 10 ? "0" + hours : hours;
+        if (mEl) mEl.innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        if (sEl) sEl.innerHTML = seconds < 10 ? "0" + seconds : seconds;
+
+        if (distance < 0) {
+            clearInterval(countdownInterval);
+            if (dEl) dEl.innerHTML = "00";
+            if (hEl) hEl.innerHTML = "00";
+            if (mEl) mEl.innerHTML = "00";
+            if (sEl) sEl.innerHTML = "00";
+        }
+    }, 1000);
+
+    // Run background elements
+    generateBackgroundHearts();
+</script>
+</body>
+</html>
